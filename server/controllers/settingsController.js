@@ -14,10 +14,10 @@ const getSettings = async (req, res, next) => {
 
 const upsertSettings = async (req, res, next) => {
   try {
-    const { name, founder, address, contact, location, domain } = req.body;
+    const { name, founder, address, contact, location, domain, facebook, twitter, youtube, instagram, whatsapp, phone } = req.body;
     const settings = await Settings.findOneAndUpdate(
       {},
-      { name, founder, address, contact, location, domain },
+      { name, founder, address, contact, location, domain, facebook, twitter, youtube, instagram, whatsapp, phone },
       { new: true, upsert: true, runValidators: true }
     );
     return res.json(settings);

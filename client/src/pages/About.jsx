@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import api from '../services/api.js';
 import Loader from '../components/Loader.jsx';
 import ErrorMessage from '../components/ErrorMessage.jsx';
-import nileshImage from '../ns.jpeg';
+import nileshImage from '../nnhh.jpeg';
 import bhudhanImage from '../bs.jpeg';
 import akashImage from '../at1.jpeg';
 import rr from '../rr.jpeg';
@@ -79,13 +79,15 @@ const About = () => {
   return (
     <section>
       <ErrorMessage message={error} />
-      <div className="page-hero mb-4">
+      <div className="page-hero mb-4 text-center">
         <p className="section-kicker text-white-50 mb-2">About Prayogam Foundation</p>
         <h1 className="section-title text-white">{content?.title || 'About Us'}</h1>
-        <p className="mb-0 text-white-50">We believe lasting social impact is built through consistent local engagement and trust.</p>
+        <p className="mb-0 text-white-50 mx-auto" style={{ maxWidth: '60ch' }}>
+          We believe lasting social impact is built through consistent local engagement and trust.
+        </p>
       </div>
       <div className="content-card p-4 p-lg-5">
-        <p className="lead text-muted mb-0">{content?.body || 'Please check back later.'}</p>
+        <p className="lead text-muted mb-0 about-body-text">{content?.body || 'Please check back later.'}</p>
       </div>
 
       <div className="mt-5">

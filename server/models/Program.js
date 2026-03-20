@@ -16,7 +16,11 @@ const programSchema = new mongoose.Schema(
       type: String,
       enum: ['active', 'inactive'],
       default: 'active'
-    }
+    },
+    image: { type: String, trim: true, default: '' },
+    mapLocation: { type: String, trim: true, default: '' },
+    lat: { type: Number, default: null },
+    lng: { type: Number, default: null }
   },
   { timestamps: true }
 );

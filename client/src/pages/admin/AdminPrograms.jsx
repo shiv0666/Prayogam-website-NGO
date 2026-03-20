@@ -2,7 +2,14 @@ import { useEffect, useState } from 'react';
 import api from '../../services/api.js';
 import ErrorMessage from '../../components/ErrorMessage.jsx';
 
-const emptyForm = { title: '', description: '', status: 'active' };
+const emptyForm = { title: '', description: '', status: 'active', image: '' };
+
+const uploadImage = async (file) => {
+  const fd = new FormData();
+  fd.append('image', file);
+  const res = await api.post('/upload', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+  return res.data.url;
+};
 
 const AdminPrograms = () => {
   const [programs, setPrograms] = useState([]);
@@ -10,6 +17,7 @@ const AdminPrograms = () => {
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const loadPrograms = async () => {
     try {
@@ -33,7 +41,8 @@ const AdminPrograms = () => {
     setFormData({
       title: program.title,
       description: program.description,
-      status: program.status
+      status: program.status,
+      image: program.image || ''
     });
   };
 
@@ -108,6 +117,34 @@ const AdminPrograms = () => {
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
               </select>
+
+              <div className="border rounded-3 p-3 bg-light-subtle">
+                <strong className="d-block mb-2">Program Image</strong>
+                {formData.image && (
+                  <img src={formData.image.startsWith('/uploads') ? `http://localhost:5050${formData.image}` : formData.image} alt="preview" className="img-thumbnail mb-2" style={{ maxHeight: 100, display: 'block' }} />
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="form-control mb-1"
+                  disabled={uploadingImage}
+                  onChange={async (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    setUploadingImage(true);
+                    try {
+                      const url = await uploadImage(file);
+                      setFormData((prev) => ({ ...prev, image: url }));
+                    } catch {
+                      setError('Image upload failed.');
+                    } finally {
+                      setUploadingImage(false);
+                    }
+                  }}
+                />
+                {uploadingImage && <small className="text-muted">Uploading…</small>}
+              </div>
+
               <div className="d-flex gap-2">
                 <button className="btn btn-primary" type="submit">
                   {editingId ? 'Update' : 'Create'}

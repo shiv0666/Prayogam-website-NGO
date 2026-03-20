@@ -1,8 +1,9 @@
 const dotenv = require('dotenv');
+const path = require('path');
 const mongoose = require('mongoose');
 const Event = require('../models/Event');
 
-dotenv.config();
+dotenv.config({ path: path.join(__dirname, '..', '.env') });
 
 const seedEvents = async () => {
   const { MONGO_URI } = process.env;

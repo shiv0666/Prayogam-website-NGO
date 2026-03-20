@@ -21,8 +21,8 @@ const getPrograms = async (req, res, next) => {
 
 const createProgram = async (req, res, next) => {
   try {
-    const { title, description, status } = req.body;
-    const program = await Program.create({ title, description, status });
+    const { title, description, status, image, mapLocation, lat, lng } = req.body;
+    const program = await Program.create({ title, description, status, image, mapLocation, lat: lat || null, lng: lng || null });
     return res.status(201).json(program);
   } catch (error) {
     return next(error);
@@ -31,10 +31,10 @@ const createProgram = async (req, res, next) => {
 
 const updateProgram = async (req, res, next) => {
   try {
-    const { title, description, status } = req.body;
+    const { title, description, status, image, mapLocation, lat, lng } = req.body;
     const program = await Program.findByIdAndUpdate(
       req.params.id,
-      { title, description, status },
+      { title, description, status, image, mapLocation, lat: lat || null, lng: lng || null },
       { new: true, runValidators: true }
     );
 

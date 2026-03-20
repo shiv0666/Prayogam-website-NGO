@@ -50,6 +50,17 @@ const eventSchema = new mongoose.Schema(
       type: String,
       enum: ['active', 'inactive'],
       default: 'active'
+    },
+    image: { type: String, trim: true, default: '' },
+    totalVolunteersRequired: {
+      type: Number,
+      min: 0,
+      default: 0
+    },
+    currentApprovedVolunteers: {
+      type: Number,
+      min: 0,
+      default: 0
     }
   },
   { timestamps: true }

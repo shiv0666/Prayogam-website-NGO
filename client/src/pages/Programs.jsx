@@ -1,10 +1,25 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import api from '../services/api.js';
 import Loader from '../components/Loader.jsx';
 import ErrorMessage from '../components/ErrorMessage.jsx';
+import plantImage from '../random/plant.jpg';
+
+const getMediaUrl = (path) => {
+  if (!path) return '';
+  if (path.startsWith('http')) return path;
+  const base = import.meta.env.DEV ? `http://${window.location.hostname}:5050` : '';
+  return `${base}${path}`;
+};
 import img4 from '../img4.jpeg';
 import img5 from '../img5.jpeg';
 import img6 from '../img6.jpeg';
+import educationSupportImage from '../extra/education-support.svg';
+import socialSupportImage from '../extra/social-support.svg';
+import environmentCareImage from '../extra/environment-care.svg';
+import healthcareSupportImage from '../extra/healthcare-support.svg';
+import donationBannerImage from '../random/donation banner.jpg';
+
+const programIllustrations = [educationSupportImage, socialSupportImage, environmentCareImage, healthcareSupportImage];
 
 const programGallery = [
   {
@@ -28,6 +43,9 @@ const Programs = () => {
   const [programs, setPrograms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [selectedProgram, setSelectedProgram] = useState(null);
+  const modalPanelRef = useRef(null);
+  const previousFocusRef = useRef(null);
 
   useEffect(() => {
     const loadPrograms = async () => {
@@ -44,12 +62,103 @@ const Programs = () => {
     loadPrograms();
   }, []);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    const cards = document.querySelectorAll('.programs-grid .reveal-on-scroll');
+    if (cards.length === 0) return undefined;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.18 }
+    );
+
+    cards.forEach((card) => observer.observe(card));
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [programs]);
+
+  const openProgramModal = (program) => {
+    setSelectedProgram(program);
+  };
+
+  const closeProgramModal = () => {
+    setSelectedProgram(null);
+  };
+
+  useEffect(() => {
+    if (!selectedProgram) return undefined;
+
+    const previousOverflow = document.body.style.overflow;
+    previousFocusRef.current = document.activeElement;
+    document.body.style.overflow = 'hidden';
+
+    const focusFirstElement = () => {
+      if (!modalPanelRef.current) return;
+      const focusableElements = modalPanelRef.current.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      const firstFocusable = focusableElements[0];
+      if (firstFocusable) {
+        firstFocusable.focus();
+      } else {
+        modalPanelRef.current.focus();
+      }
+    };
+
+    focusFirstElement();
+
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') {
+        closeProgramModal();
+        return;
+      }
+
+      if (event.key === 'Tab' && modalPanelRef.current) {
+        const focusableElements = modalPanelRef.current.querySelectorAll(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusableElements.length === 0) return;
+
+        const firstFocusable = focusableElements[0];
+        const lastFocusable = focusableElements[focusableElements.length - 1];
+        const activeElement = document.activeElement;
+
+        if (event.shiftKey && activeElement === firstFocusable) {
+          event.preventDefault();
+          lastFocusable.focus();
+        } else if (!event.shiftKey && activeElement === lastFocusable) {
+          event.preventDefault();
+          firstFocusable.focus();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleEscape);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', handleEscape);
+      if (previousFocusRef.current && typeof previousFocusRef.current.focus === 'function') {
+        previousFocusRef.current.focus();
+      }
+    };
+  }, [selectedProgram]);
+
   if (loading) return <Loader />;
 
   return (
     <section>
       <ErrorMessage message={error} />
-      <div className="page-hero mb-4">
+      <div className="page-hero programs-hero mb-4" style={{ backgroundImage: `linear-gradient(135deg, rgba(8, 22, 46, 0.8), rgba(14, 72, 92, 0.72)), url(${donationBannerImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
         <p className="section-kicker text-white-50 mb-2">Programs</p>
         <h1 className="section-title text-white mb-2">Our Programs</h1>
         <p className="mb-0 text-white-50">Designed for direct impact, local relevance, and long-term sustainability.</p>
@@ -58,26 +167,99 @@ const Programs = () => {
         <h2 className="section-title mb-0">Active Initiatives</h2>
         <span className="text-muted small">{programs.length} initiatives</span>
       </div>
-      <div className="row g-4">
+      <div className="row g-4 programs-grid">
         {programs.length === 0 && (
           <div className="col-12">
             <div className="content-card p-4 text-muted text-center">No programs listed.</div>
           </div>
         )}
-        {programs.map((program) => (
-          <div className="col-md-6" key={program._id}>
-            <div className="content-card h-100 p-4">
-              <div className="d-flex justify-content-between align-items-start mb-2">
-                <h4 className="mb-0">{program.title}</h4>
-                <span className={`badge ${program.status === 'inactive' ? 'text-bg-secondary' : 'text-bg-success'}`}>
-                  {program.status || 'active'}
+        {programs.map((program, index) => {
+          const isEnvironmentProgram = program.title?.toLowerCase().includes('environment') || program.title?.toLowerCase().includes('green') || program.title?.toLowerCase().includes('plant');
+          const programImage = program.image ? getMediaUrl(program.image) : programIllustrations[index % programIllustrations.length];
+          const revealDelay = (index % 3) * 85 + Math.floor(index / 3) * 55;
+          
+          return (
+          <div className="col-sm-6 col-lg-4" key={program._id}>
+            <article
+              className="content-card h-100 overflow-hidden program-rich-card reveal-on-scroll"
+              style={{ '--reveal-delay': `${revealDelay}ms` }}
+            >
+              <div className="program-card-media" style={isEnvironmentProgram ? { backgroundImage: `url(${plantImage})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}>
+                <img
+                  src={programImage}
+                  alt={program.title}
+                  className="program-card-image"
+                />
+                <div className="program-card-overlay" />
+                <div className="program-card-media-content">
+                  <h4 className="program-card-title mb-0">{program.title}</h4>
+                  <span className={`program-status-pill ${program.status === 'inactive' ? 'is-inactive' : ''}`}>
+                    {program.status || 'active'}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  className="btn btn-light btn-sm program-card-view-btn"
+                  onClick={() => openProgramModal(program)}
+                >
+                  View Details
+                </button>
+              </div>
+              <div className="p-4 d-flex flex-column program-card-body">
+                <p className="text-muted mb-3 program-card-description">{program.description}</p>
+                <div className="d-flex align-items-center gap-2 mt-auto flex-wrap">
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-sm program-learn-btn"
+                    onClick={() => openProgramModal(program)}
+                  >
+                    Learn More
+                  </button>
+                </div>
+              </div>
+            </article>
+          </div>
+        );
+        })}
+      </div>
+
+      {selectedProgram && (
+        <div
+          className="program-modal-backdrop"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="program-modal-title"
+          aria-describedby="program-modal-description"
+          onClick={closeProgramModal}
+        >
+          <div
+            className="program-modal-panel content-card"
+            onClick={(event) => event.stopPropagation()}
+            ref={modalPanelRef}
+            tabIndex={-1}
+          >
+            <button type="button" className="program-modal-close" onClick={closeProgramModal} aria-label="Close details">
+              ×
+            </button>
+            <div className="program-modal-media">
+              <img
+                src={selectedProgram.image ? getMediaUrl(selectedProgram.image) : programIllustrations[0]}
+                alt={selectedProgram.title}
+                className="program-modal-image"
+              />
+            </div>
+            <div className="p-4 p-md-5">
+              <div className="d-flex justify-content-between align-items-start gap-3 mb-3 flex-wrap">
+                <h3 className="section-title h4 mb-0" id="program-modal-title">{selectedProgram.title}</h3>
+                <span className={`program-status-pill ${selectedProgram.status === 'inactive' ? 'is-inactive' : ''}`}>
+                  {selectedProgram.status || 'active'}
                 </span>
               </div>
-              <p className="text-muted mb-0">{program.description}</p>
+              <p className="mb-0 text-muted" id="program-modal-description">{selectedProgram.description}</p>
             </div>
           </div>
-        ))}
-      </div>
+        </div>
+      )}
 
       <div className="content-card p-3 p-lg-4 mt-5">
         <div className="d-flex justify-content-between align-items-center mb-3">

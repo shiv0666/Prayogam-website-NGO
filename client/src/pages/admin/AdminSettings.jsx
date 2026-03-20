@@ -8,7 +8,13 @@ const emptyForm = {
   address: '',
   contact: '',
   location: '',
-  domain: ''
+  domain: '',
+  facebook: '',
+  twitter: '',
+  youtube: '',
+  instagram: '',
+  whatsapp: '',
+  phone: ''
 };
 
 const AdminSettings = () => {
@@ -99,6 +105,50 @@ const AdminSettings = () => {
             value={formData.domain}
             onChange={handleChange}
             required
+          />
+          <hr className="my-2" />
+          <h6 className="fw-semibold text-muted mb-1">Social Media Links</h6>
+          <input
+            className="form-control"
+            name="facebook"
+            placeholder="Facebook URL"
+            value={formData.facebook || ''}
+            onChange={handleChange}
+          />
+          <input
+            className="form-control"
+            name="twitter"
+            placeholder="X (Twitter) URL"
+            value={formData.twitter || ''}
+            onChange={handleChange}
+          />
+          <input
+            className="form-control"
+            name="youtube"
+            placeholder="YouTube URL"
+            value={formData.youtube || ''}
+            onChange={handleChange}
+          />
+          <input
+            className="form-control"
+            name="instagram"
+            placeholder="Instagram URL"
+            value={formData.instagram || ''}
+            onChange={handleChange}
+          />
+          <input
+            className="form-control"
+            name="whatsapp"
+            placeholder="WhatsApp link (e.g. https://wa.me/91XXXXXXXXXX)"
+            value={formData.whatsapp || ''}
+            onChange={handleChange}
+          />
+          <input
+            className="form-control"
+            name="phone"
+            placeholder="Phone number (e.g. +91XXXXXXXXXX)"
+            value={formData.phone || ''}
+            onChange={handleChange}
           />
           <button className="btn btn-primary" type="submit">Save Details</button>
         </form>

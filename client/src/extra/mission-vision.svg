@@ -1,0 +1,23 @@
+<svg width="800" height="600" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="600" rx="36" fill="url(#bg)"/>
+  <rect x="120" y="120" width="560" height="360" rx="30" fill="#FFFFFF" fill-opacity="0.88"/>
+  <path d="M220 430L350 210L447 338L530 275L592 430H220Z" fill="url(#mountain)"/>
+  <circle cx="540" cy="180" r="42" fill="#F97316" fill-opacity="0.24"/>
+  <path d="M391 188L406 234H454L415 262L430 308L391 279L352 308L367 262L328 234H376L391 188Z" fill="#2563EB"/>
+  <path d="M258 191H344" stroke="#D7E5FF" stroke-width="16" stroke-linecap="round"/>
+  <path d="M258 233H314" stroke="#D7E5FF" stroke-width="16" stroke-linecap="round"/>
+  <path d="M258 275H294" stroke="#D7E5FF" stroke-width="16" stroke-linecap="round"/>
+  <rect x="208" y="387" width="384" height="22" rx="11" fill="#DBEAFE"/>
+  <rect x="208" y="426" width="286" height="22" rx="11" fill="#DCFCE7"/>
+  <defs>
+    <linearGradient id="bg" x1="91" y1="63" x2="684" y2="551" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#EEF2FF"/>
+      <stop offset="0.55" stop-color="#EFF6FF"/>
+      <stop offset="1" stop-color="#ECFDF5"/>
+    </linearGradient>
+    <linearGradient id="mountain" x1="220" y1="210" x2="592" y2="430" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#60A5FA"/>
+      <stop offset="1" stop-color="#10B981"/>
+    </linearGradient>
+  </defs>
+</svg>

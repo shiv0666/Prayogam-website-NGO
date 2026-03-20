@@ -1,8 +1,27 @@
 const Announcement = require('../models/Announcement');
 const { isAdminRole } = require('../middleware/auth');
 
+const getStartOfToday = () => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return today;
+};
+
+const ensureAnnouncementDateIsValid = (date) => {
+  const announcementDate = new Date(date);
+  announcementDate.setHours(0, 0, 0, 0);
+
+  if (announcementDate < getStartOfToday()) {
+    const error = new Error('Past dates are not allowed for announcements');
+    error.statusCode = 400;
+    throw error;
+  }
+};
+
 const getAnnouncements = async (req, res, next) => {
   try {
+    await Announcement.deleteMany({ date: { $lt: getStartOfToday() } });
+
     const showAll = req.query.all === 'true';
     if (showAll) {
       if (!req.user || !isAdminRole(req.user.role)) {
@@ -22,9 +41,13 @@ const getAnnouncements = async (req, res, next) => {
 const createAnnouncement = async (req, res, next) => {
   try {
     const { title, message, date } = req.body;
+    ensureAnnouncementDateIsValid(date);
     const announcement = await Announcement.create({ title, message, date });
     return res.status(201).json(announcement);
   } catch (error) {
+    if (error.statusCode) {
+      return res.status(error.statusCode).json({ message: error.message });
+    }
     return next(error);
   }
 };
@@ -32,6 +55,7 @@ const createAnnouncement = async (req, res, next) => {
 const updateAnnouncement = async (req, res, next) => {
   try {
     const { title, message, date } = req.body;
+    ensureAnnouncementDateIsValid(date);
     const announcement = await Announcement.findByIdAndUpdate(
       req.params.id,
       { title, message, date },
@@ -44,6 +68,9 @@ const updateAnnouncement = async (req, res, next) => {
 
     return res.json(announcement);
   } catch (error) {
+    if (error.statusCode) {
+      return res.status(error.statusCode).json({ message: error.message });
+    }
     return next(error);
   }
 };

@@ -20,11 +20,19 @@ const AdminLogin = () => {
     setError('');
     setLoading(true);
     try {
-      const response = await api.post('/auth/login', formData);
+      const payload = {
+        email: formData.email.trim().toLowerCase(),
+        password: formData.password
+      };
+      const response = await api.post('/auth/login', payload);
       login(response.data.token, response.data.user);
       navigate('/admin/dashboard');
     } catch (err) {
-      setError('Invalid login credentials.');
+      if (err?.response?.status === 401) {
+        setError('Invalid login credentials.');
+      } else {
+        setError('Server unavailable. Please start backend and try again.');
+      }
     } finally {
       setLoading(false);
     }

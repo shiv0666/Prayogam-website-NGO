@@ -4,12 +4,19 @@ import ErrorMessage from '../../components/ErrorMessage.jsx';
 
 const emptyForm = { title: '', message: '', date: '' };
 
+const getTodayDateString = () => {
+  const today = new Date();
+  const timezoneAdjusted = new Date(today.getTime() - today.getTimezoneOffset() * 60000);
+  return timezoneAdjusted.toISOString().slice(0, 10);
+};
+
 const AdminAnnouncements = () => {
   const [announcements, setAnnouncements] = useState([]);
   const [formData, setFormData] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const minDate = getTodayDateString();
 
   const loadAnnouncements = async () => {
     try {
@@ -46,6 +53,12 @@ const AdminAnnouncements = () => {
     event.preventDefault();
     setError('');
     setSuccess('');
+
+    if (formData.date < minDate) {
+      setError('Past dates are not allowed for announcements.');
+      return;
+    }
+
     try {
       if (editingId) {
         await api.put(`/announcements/${editingId}`, formData);
@@ -110,6 +123,7 @@ const AdminAnnouncements = () => {
                 name="date"
                 value={formData.date}
                 onChange={handleChange}
+                min={minDate}
                 required
               />
               <div className="d-flex gap-2">

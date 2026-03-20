@@ -2,6 +2,7 @@ const express = require('express');
 const { body, param } = require('express-validator');
 const {
   getEvents,
+  getEventById,
   createEvent,
   updateEvent,
   deleteEvent
@@ -13,6 +14,7 @@ const optionalAuth = require('../middleware/optionalAuth');
 const router = express.Router();
 
 router.get('/', optionalAuth, getEvents);
+router.get('/:id', [param('id').isMongoId()], validateRequest, getEventById);
 
 router.post(
   '/',
@@ -24,6 +26,7 @@ router.post(
     body('date').notEmpty().isISO8601().withMessage('Valid date is required'),
     body('location').optional().isString(),
     body('status').optional().isIn(['active', 'inactive']),
+    body('totalVolunteersRequired').optional().isInt({ min: 0 }),
     body('requirements.volunteersNeeded').optional().isInt({ min: 0 }),
     body('requirements.fundsNeeded').optional().isFloat({ min: 0 }),
     body('requirements.itemsNeeded').optional().isString()
@@ -43,6 +46,7 @@ router.put(
     body('date').notEmpty().isISO8601().withMessage('Valid date is required'),
     body('location').optional().isString(),
     body('status').optional().isIn(['active', 'inactive']),
+    body('totalVolunteersRequired').optional().isInt({ min: 0 }),
     body('requirements.volunteersNeeded').optional().isInt({ min: 0 }),
     body('requirements.fundsNeeded').optional().isFloat({ min: 0 }),
     body('requirements.itemsNeeded').optional().isString()

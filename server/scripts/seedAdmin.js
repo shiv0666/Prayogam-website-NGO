@@ -1,8 +1,9 @@
 const dotenv = require('dotenv');
+const path = require('path');
 const mongoose = require('mongoose');
 const Admin = require('../models/Admin');
 
-dotenv.config();
+dotenv.config({ path: path.join(__dirname, '..', '.env') });
 
 const seedAdmin = async () => {
   const { MONGO_URI, ADMIN_SEED_EMAIL, ADMIN_SEED_PASSWORD } = process.env;
