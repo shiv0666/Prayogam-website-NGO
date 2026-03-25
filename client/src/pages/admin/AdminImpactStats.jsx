@@ -49,18 +49,30 @@ const AdminImpactStats = () => {
     event.preventDefault();
     setError('');
     setSuccess('');
+
+    const payload = {
+      ...formData,
+      order:
+        formData.order === undefined ||
+        formData.order === null ||
+        String(formData.order).trim() === ''
+          ? undefined
+          : Number(formData.order)
+    };
+
     try {
       if (editingId) {
-        await api.put(`/impact-stats/${editingId}`, formData);
+        await api.put(`/impact-stats/${editingId}`, payload);
         setSuccess('Impact stat updated.');
       } else {
-        await api.post('/impact-stats', formData);
+        await api.post('/impact-stats', payload);
         setSuccess('Impact stat created.');
       }
       resetForm();
       loadStats();
     } catch (err) {
-      setError(err?.response?.data?.message || 'Unable to save impact stat.');
+      const firstValidationError = err?.response?.data?.errors?.[0]?.msg;
+      setError(firstValidationError || err?.response?.data?.message || 'Unable to save impact stat.');
     }
   };
 

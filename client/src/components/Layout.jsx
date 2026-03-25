@@ -48,7 +48,7 @@ const Layout = ({ admin, children }) => {
   return (
     <div className={`main-shell ${admin ? 'admin-layout' : ''}`}>
       <Header admin={admin} />
-      <main className="site-main container py-4 py-lg-5">
+      <main className="site-main container pt-2 pt-lg-3 pb-4 pb-lg-5">
         {children || <Outlet />}
       </main>
       {!admin && <Footer />}

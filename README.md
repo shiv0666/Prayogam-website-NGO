@@ -8,6 +8,7 @@ Professional MERN website template for Prayogam Foundation with a public-facing 
 - Admin dashboard with JWT authentication and role checks
 - Content management for programs, announcements, events, and pages
 - Contact form persistence in MongoDB
+- Automatic startup seeding for initiatives, programs, and events (idempotent)
 - Production-aware backend security defaults (Helmet, CORS allow-list, proxy support)
 
 ## Tech Stack
@@ -29,16 +30,38 @@ Professional MERN website template for Prayogam Foundation with a public-facing 
    - Copy `server/.env.example` to `server/.env`
    - Copy `client/.env.example` to `client/.env`
 
-3. Seed admin and starter content
-   - `npm --prefix server run seed`
-   - Optional: `npm --prefix server run seed:content`
-   - Optional: `npm --prefix server run seed:events`
-
-4. Run the app
+3. Run the app
    - Both services from root: `npm run dev`
    - Or separately:
      - API: `npm --prefix server run dev`
      - Web: `npm --prefix client run dev`
+
+4. Optional manual seed scripts
+    - `npm --prefix server run seed`
+    - `npm --prefix server run seed:content`
+    - `npm --prefix server run seed:events`
+
+## Automatic Startup Seeding
+- On API startup, the backend checks these collections:
+   - `initiatives`
+   - `programs`
+   - `events`
+- If a collection is empty, default data is inserted from:
+   - `server/seed/initiatives.json`
+   - `server/seed/programs.json`
+   - `server/seed/events.json`
+- If data already exists, nothing is inserted.
+- This keeps seeding safe and idempotent (no duplicate inserts from startup seeding).
+
+### Active Initiatives (Homepage Cards)
+- Homepage initiative cards are populated from the `initiatives` collection.
+- Frontend only shows initiatives where `status === "active"`.
+- Seed data for those cards is in `server/seed/initiatives.json`.
+
+### Initiative Card Images
+- JSON stores image filenames only (example: `health.jpg`).
+- Place image files in `client/src/assets/initiatives/`.
+- Frontend resolves the filename to the matching local asset at runtime.
 
 ## Environment Variables
 
@@ -51,6 +74,7 @@ Professional MERN website template for Prayogam Foundation with a public-facing 
 - `CORS_ORIGIN` (comma-separated origins)
 - `ADMIN_SEED_EMAIL`
 - `ADMIN_SEED_PASSWORD`
+- `SEED_DB` (optional; `true/1/yes/on` enables startup auto-seed, `false/0/no/off` disables it)
 
 ### Client (`client/.env`)
 - `VITE_API_URL` (example: `http://localhost:5000/api`)

@@ -6,6 +6,7 @@ const path = require('path');
 const connectDB = require('./config/db');
 const errorHandler = require('./middleware/errorHandler');
 const Admin = require('./models/Admin');
+const seedDatabase = require('./seed/seed');
 
 dotenv.config({ path: path.join(__dirname, '.env') });
 
@@ -68,6 +69,7 @@ app.use('/api/settings', require('./routes/settingsRoutes'));
 app.use('/api/impact-stats', require('./routes/impactStatRoutes'));
 app.use('/api/donations', require('./routes/donationRoutes'));
 app.use('/api/stories', require('./routes/storyRoutes'));
+app.use('/api/initiatives', require('./routes/initiativeRoutes'));
 app.use('/api/upload', require('./routes/uploadRoutes'));
 app.use('/api/fund-ledger', require('./routes/fundLedgerRoutes'));
 app.use('/api/volunteers', require('./routes/volunteerRoutes'));
@@ -103,6 +105,9 @@ const ensureAdminSeed = async () => {
 connectDB()
   .then(() => {
     return ensureAdminSeed();
+  })
+  .then(() => {
+    return seedDatabase();
   })
   .then(() => {
     app.listen(PORT, () => {

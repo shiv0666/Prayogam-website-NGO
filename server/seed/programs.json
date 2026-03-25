@@ -1,0 +1,29 @@
+[
+  {
+    "title": "Community Learning Support",
+    "description": "Learning support sessions and resource guidance for students and families to strengthen foundational learning and study habits.",
+    "status": "active",
+    "image": "",
+    "mapLocation": "",
+    "lat": null,
+    "lng": null
+  },
+  {
+    "title": "Education Awareness and Training",
+    "description": "Awareness programs and training sessions for parents, educators, and community members to encourage educational continuity.",
+    "status": "active",
+    "image": "",
+    "mapLocation": "",
+    "lat": null,
+    "lng": null
+  },
+  {
+    "title": "Student Mentorship and Guidance",
+    "description": "Mentorship and guidance for students to navigate academic goals, career awareness, and skill-building pathways.",
+    "status": "active",
+    "image": "",
+    "mapLocation": "",
+    "lat": null,
+    "lng": null
+  }
+]

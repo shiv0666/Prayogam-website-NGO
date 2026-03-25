@@ -58,15 +58,35 @@ const getMediaUrl = (path) => {
   return `${base}${path}`;
 };
 
+const initiativeImageMap = Object.fromEntries(
+  Object.entries(
+    import.meta.glob('../assets/initiatives/*.{jpg,jpeg,png,webp,gif}', {
+      eager: true,
+      import: 'default'
+    })
+  ).map(([modulePath, moduleUrl]) => [modulePath.split('/').pop(), moduleUrl])
+);
+
+const resolveInitiativeImage = (image) => {
+  if (!image) return '';
+  if (image.startsWith('http') || image.startsWith('/uploads')) {
+    return getMediaUrl(image);
+  }
+
+  return initiativeImageMap[image] || '';
+};
+
 const Home = () => {
   const [settings, setSettings] = useState(null);
   const [content, setContent] = useState(null);
+  const [initiatives, setInitiatives] = useState([]);
   const [programs, setPrograms] = useState([]);
   const [announcements, setAnnouncements] = useState([]);
   const [events, setEvents] = useState([]);
   const [impactStats, setImpactStats] = useState([]);
   const [stories, setStories] = useState([]);
   const [selectedStory, setSelectedStory] = useState(null);
+  const [openInitiativeId, setOpenInitiativeId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -76,6 +96,7 @@ const Home = () => {
         const results = await Promise.allSettled([
           api.get('/settings'),
           api.get('/content/home'),
+          api.get('/initiatives'),
           api.get('/programs'),
           api.get('/announcements'),
           api.get('/events'),
@@ -83,13 +104,16 @@ const Home = () => {
           api.get('/stories')
         ]);
 
-        const [settingsRes, contentRes, programRes, announcementRes, eventRes, impactStatsRes, storiesRes] = results;
+        const [settingsRes, contentRes, initiativesRes, programRes, announcementRes, eventRes, impactStatsRes, storiesRes] = results;
 
         if (settingsRes.status === 'fulfilled') {
           setSettings(settingsRes.value.data);
         }
         if (contentRes.status === 'fulfilled') {
           setContent(contentRes.value.data);
+        }
+        if (initiativesRes.status === 'fulfilled') {
+          setInitiatives(Array.isArray(initiativesRes.value.data) ? initiativesRes.value.data : []);
         }
         if (programRes.status === 'fulfilled') {
           setPrograms(programRes.value.data);
@@ -141,6 +165,10 @@ const Home = () => {
     acc[dateKey].push(event);
     return acc;
   }, {});
+
+  const activeInitiatives = initiatives.filter(
+    (initiative) => String(initiative.status || '').toLowerCase() === 'active'
+  );
 
   return (
     <div className="d-grid gap-5">
@@ -224,6 +252,56 @@ const Home = () => {
           ))}
         </div>
       </section>
+
+      {activeInitiatives.length > 0 && (
+        <section className="p-4 p-lg-5">
+          <div className="text-center mb-4 mb-lg-5">
+            <p className="section-kicker mb-2">Active Initiatives</p>
+            <h2 className="section-title mb-0">Current Initiatives in Action</h2>
+          </div>
+          <div className="row g-4">
+            {activeInitiatives.map((initiative) => {
+              const initiativeId = initiative._id || initiative.title;
+              const isOpen = openInitiativeId === initiativeId;
+              const panelId = `initiative-panel-${String(initiativeId).replace(/[^a-zA-Z0-9_-]/g, '-')}`;
+
+              return (
+                <div className="col-md-6 col-xl-4" key={initiativeId}>
+                  <article className={`content-card h-100 p-0 overflow-hidden home-initiative-card ${isOpen ? 'is-open' : ''}`}>
+                    {resolveInitiativeImage(initiative.image) && (
+                      <img
+                        src={resolveInitiativeImage(initiative.image)}
+                        alt={initiative.title}
+                        className="w-100 home-initiative-image"
+                        loading="lazy"
+                      />
+                    )}
+
+                    <button
+                      type="button"
+                      className="home-initiative-toggle"
+                      onClick={() => setOpenInitiativeId(isOpen ? null : initiativeId)}
+                      aria-expanded={isOpen}
+                      aria-controls={panelId}
+                    >
+                      <div className="home-initiative-header p-4">
+                        <p className="section-kicker mb-1">Initiative</p>
+                        <h3 className="h5 mb-0">{initiative.title}</h3>
+                      </div>
+                    </button>
+
+                    <div id={panelId} className={`home-initiative-description ${isOpen ? 'is-open' : ''}`}>
+                      <div className="home-initiative-description-inner px-4 pb-4">
+                        <p className="text-muted mb-0">{initiative.description}</p>
+                      </div>
+                    </div>
+                  </article>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       <section>
         <div className="statement-section p-4 p-lg-5">

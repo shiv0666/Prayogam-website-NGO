@@ -18,6 +18,7 @@ import socialSupportImage from '../extra/social-support.svg';
 import environmentCareImage from '../extra/environment-care.svg';
 import healthcareSupportImage from '../extra/healthcare-support.svg';
 import donationBannerImage from '../random/donation banner.jpg';
+import InitiativeTimeline from '../components/InitiativeTimeline.jsx';
 
 const programIllustrations = [educationSupportImage, socialSupportImage, environmentCareImage, healthcareSupportImage];
 
@@ -163,6 +164,9 @@ const Programs = () => {
         <h1 className="section-title text-white mb-2">Our Programs</h1>
         <p className="mb-0 text-white-50">Designed for direct impact, local relevance, and long-term sustainability.</p>
       </div>
+
+      <InitiativeTimeline />
+
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h2 className="section-title mb-0">Active Initiatives</h2>
         <span className="text-muted small">{programs.length} initiatives</span>

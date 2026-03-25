@@ -25,6 +25,7 @@ import AdminStories from './pages/admin/AdminStories.jsx';
 import AdminVolunteers from './pages/admin/AdminVolunteers.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import AdminFundLedger from './pages/admin/AdminFundLedger.jsx';
+import AdminInitiatives from './pages/admin/AdminInitiatives.jsx';
 
 const App = () => {
   return (
@@ -191,6 +192,17 @@ const App = () => {
           <ProtectedRoute allowedRoles={['admin', 'ngo_admin']}>
             <Layout admin>
               <AdminStories />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/initiatives"
+        element={
+          <ProtectedRoute allowedRoles={['admin', 'ngo_admin']}>
+            <Layout admin>
+              <AdminInitiatives />
             </Layout>
           </ProtectedRoute>
         }

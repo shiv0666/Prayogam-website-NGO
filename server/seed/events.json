@@ -1,0 +1,47 @@
+[
+  {
+    "title": "Learning Camp Orientation",
+    "description": "Orientation for volunteers and mentors supporting weekend learning camps.",
+    "date": "2026-05-10T09:00:00.000Z",
+    "location": "Nagpur Community Center",
+    "requirements": {
+      "volunteersNeeded": 12,
+      "fundsNeeded": 15000,
+      "itemsNeeded": "Notebooks, pens, whiteboard markers"
+    },
+    "status": "active",
+    "image": "",
+    "totalVolunteersRequired": 12,
+    "currentApprovedVolunteers": 0
+  },
+  {
+    "title": "Education Awareness Drive",
+    "description": "Neighborhood outreach focusing on school attendance and learning continuity.",
+    "date": "2026-06-01T09:00:00.000Z",
+    "location": "Narsala Ward",
+    "requirements": {
+      "volunteersNeeded": 8,
+      "fundsNeeded": 8000,
+      "itemsNeeded": "Flyers, banner stand"
+    },
+    "status": "active",
+    "image": "",
+    "totalVolunteersRequired": 8,
+    "currentApprovedVolunteers": 0
+  },
+  {
+    "title": "Mentorship Check-in",
+    "description": "Monthly check-in for student mentorship program updates.",
+    "date": "2026-06-20T09:00:00.000Z",
+    "location": "Prayogam Office",
+    "requirements": {
+      "volunteersNeeded": 4,
+      "fundsNeeded": 0,
+      "itemsNeeded": ""
+    },
+    "status": "active",
+    "image": "",
+    "totalVolunteersRequired": 4,
+    "currentApprovedVolunteers": 0
+  }
+]

@@ -1,0 +1,20 @@
+[
+  {
+    "title": "Community Health and Wellness Fair",
+    "description": "A one-day outreach program providing free health check-ups, consultations, and awareness sessions in underserved communities.",
+    "image": "health.jpg",
+    "status": "active"
+  },
+  {
+    "title": "Leadership and Personality Development Camp",
+    "description": "A 15-day program helping students build confidence, communication skills, and leadership abilities.",
+    "image": "leadership.jpg",
+    "status": "active"
+  },
+  {
+    "title": "Community Learning Support",
+    "description": "Regular learning sessions and mentorship support to strengthen academic foundations for students.",
+    "image": "learning.jpg",
+    "status": "active"
+  }
+]

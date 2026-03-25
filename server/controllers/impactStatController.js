@@ -63,9 +63,25 @@ const updateImpactStat = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { title, value, description, icon, status, order } = req.body;
+
+    const updateData = {
+      title,
+      value,
+      description,
+      icon,
+      status
+    };
+
+    if (!(order === undefined || order === null || String(order).trim() === '')) {
+      const parsed = Number(order);
+      if (!Number.isNaN(parsed)) {
+        updateData.order = parsed;
+      }
+    }
+
     const stat = await ImpactStat.findByIdAndUpdate(
       id,
-      { title, value, description, icon, status, order },
+      updateData,
       { new: true, runValidators: true }
     );
     if (!stat) {

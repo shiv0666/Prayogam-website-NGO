@@ -55,15 +55,16 @@ const Donate = () => {
   const [submittedDonation, setSubmittedDonation] = useState(null);
   const [showDonationForm, setShowDonationForm] = useState(false);
   const [isVolunteerModalOpen, setIsVolunteerModalOpen] = useState(false);
+  const [formValidationError, setFormValidationError] = useState('');
   const [volunteerData, setVolunteerData] = useState({
     name: '',
     email: '',
     phone: '',
-    city: '',
-    message: ''
+    city: ''
   });
   const [volunteerSubmitting, setVolunteerSubmitting] = useState(false);
   const [volunteerError, setVolunteerError] = useState('');
+    const [volunteerValidationError, setVolunteerValidationError] = useState('');
   const [volunteerSuccess, setVolunteerSuccess] = useState('');
 
   const resolvedAmount = useMemo(() => {
@@ -104,11 +105,34 @@ const Donate = () => {
     setVolunteerError('');
     setVolunteerSuccess('');
     setVolunteerSubmitting(true);
+      setVolunteerValidationError('');
+
+      // Validate all required fields
+      if (!volunteerData.name.trim()) {
+        setVolunteerValidationError('Please enter your full name.');
+        setVolunteerSubmitting(false);
+        return;
+      }
+      if (!volunteerData.email.trim()) {
+        setVolunteerValidationError('Please enter your email address.');
+        setVolunteerSubmitting(false);
+        return;
+      }
+      if (!volunteerData.phone.trim()) {
+        setVolunteerValidationError('Please enter your phone number.');
+        setVolunteerSubmitting(false);
+        return;
+      }
+      if (!volunteerData.city.trim()) {
+        setVolunteerValidationError('Please enter your city.');
+        setVolunteerSubmitting(false);
+        return;
+      }
 
     try {
       await api.post('/volunteers/register', volunteerData);
       setVolunteerSuccess('Thank you for volunteering. Your registration has been submitted.');
-      setVolunteerData({ name: '', email: '', phone: '', city: '', message: '' });
+      setVolunteerData({ name: '', email: '', phone: '', city: '' });
       window.setTimeout(() => {
         setIsVolunteerModalOpen(false);
         setVolunteerSuccess('');
@@ -122,6 +146,22 @@ const Donate = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setFormValidationError('');
+
+    // Validate name, email and phone are filled
+    if (!formData.name.trim()) {
+      setFormValidationError('Please enter your full name to proceed.');
+      return;
+    }
+    if (!formData.email.trim()) {
+      setFormValidationError('Please enter your email to proceed.');
+      return;
+    }
+    if (!formData.phone.trim()) {
+      setFormValidationError('Please enter your phone number to proceed.');
+      return;
+    }
+
     const amount = Number.isFinite(resolvedAmount) && resolvedAmount > 0 ? resolvedAmount : selectedAmount;
     try {
       await api.post('/donations', {
@@ -257,6 +297,11 @@ const Donate = () => {
 
                 <div>
                   <label className="form-label fw-semibold">3. Donor details</label>
+                  {formValidationError && (
+                    <div className="alert alert-danger mb-3" role="alert">
+                      {formValidationError}
+                    </div>
+                  )}
                   <div className="row g-3 mt-1">
                     <div className="col-12">
                       <input
@@ -354,11 +399,15 @@ const Donate = () => {
               <h2 className="section-title h4 mb-3" id="volunteer-modal-title">Volunteer Registration</h2>
 
               <form className="form" onSubmit={handleVolunteerSubmit}>
+                  {volunteerValidationError && (
+                    <div className="alert alert-danger mb-3" role="alert">
+                      {volunteerValidationError}
+                    </div>
+                  )}
                 <input className="form-control" name="name" placeholder="Full Name" value={volunteerData.name} onChange={handleVolunteerInputChange} required />
                 <input className="form-control" type="email" name="email" placeholder="Email" value={volunteerData.email} onChange={handleVolunteerInputChange} required />
                 <input className="form-control" name="phone" placeholder="Phone Number" value={volunteerData.phone} onChange={handleVolunteerInputChange} required />
                 <input className="form-control" name="city" placeholder="City" value={volunteerData.city} onChange={handleVolunteerInputChange} required />
-                <textarea className="form-control" rows="4" name="message" placeholder="Message (optional)" value={volunteerData.message} onChange={handleVolunteerInputChange} />
 
                 {volunteerError && <p className="text-danger small mb-0">{volunteerError}</p>}
                 {volunteerSuccess && <p className="text-success small mb-0">{volunteerSuccess}</p>}

@@ -1,6 +1,45 @@
 import { useEffect, useState } from 'react';
 import api from '../services/api.js';
 
+const normalizeWebUrl = (value) => {
+  if (!value) return '';
+  const trimmed = String(value).trim();
+  if (!trimmed) return '';
+
+  const withProtocol = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+
+  try {
+    const parsed = new URL(withProtocol);
+    return parsed.href;
+  } catch {
+    return '';
+  }
+};
+
+const normalizeWhatsAppUrl = (value) => {
+  if (!value) return '';
+  const trimmed = String(value).trim();
+  if (!trimmed) return '';
+
+  if (/^https?:\/\//i.test(trimmed)) {
+    return normalizeWebUrl(trimmed);
+  }
+
+  const digitsOnly = trimmed.replace(/[^\d]/g, '');
+  if (!digitsOnly) return '';
+  return `https://wa.me/${digitsOnly}`;
+};
+
+const normalizePhoneUrl = (value) => {
+  if (!value) return '';
+  const trimmed = String(value).trim();
+  if (!trimmed) return '';
+
+  const cleaned = trimmed.replace(/[^\d+]/g, '');
+  if (!cleaned) return '';
+  return `tel:${cleaned}`;
+};
+
 const FacebookIcon = () => (
   <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
     <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
@@ -42,12 +81,12 @@ const PhoneIcon = () => (
 );
 
 const socialConfig = [
-  { key: 'facebook',  Icon: FacebookIcon,  bg: '#1877f2', label: 'Facebook',  hrefFn: (v) => v },
-  { key: 'twitter',   Icon: XIcon,         bg: '#000',    label: 'X',         hrefFn: (v) => v },
-  { key: 'youtube',   Icon: YoutubeIcon,   bg: '#ff0000', label: 'YouTube',   hrefFn: (v) => v },
-  { key: 'instagram', Icon: InstagramIcon, bg: '#e1306c', label: 'Instagram', hrefFn: (v) => v },
-  { key: 'whatsapp',  Icon: WhatsappIcon,  bg: '#25d366', label: 'WhatsApp',  hrefFn: (v) => v },
-  { key: 'phone',     Icon: PhoneIcon,     bg: '#f97316', label: 'Phone',     hrefFn: (v) => `tel:${v}` },
+  { key: 'facebook',  Icon: FacebookIcon,  bg: '#1877f2', label: 'Facebook',  hrefFn: normalizeWebUrl },
+  { key: 'twitter',   Icon: XIcon,         bg: '#000',    label: 'X',         hrefFn: normalizeWebUrl },
+  { key: 'youtube',   Icon: YoutubeIcon,   bg: '#ff0000', label: 'YouTube',   hrefFn: normalizeWebUrl },
+  { key: 'instagram', Icon: InstagramIcon, bg: '#e1306c', label: 'Instagram', hrefFn: normalizeWebUrl },
+  { key: 'whatsapp',  Icon: WhatsappIcon,  bg: '#25d366', label: 'WhatsApp',  hrefFn: normalizeWhatsAppUrl },
+  { key: 'phone',     Icon: PhoneIcon,     bg: '#f97316', label: 'Phone',     hrefFn: normalizePhoneUrl },
 ];
 
 const SocialBar = () => {
@@ -63,8 +102,9 @@ const SocialBar = () => {
     <div className="social-bar" aria-label="Social media links">
       {socialConfig.map(({ key, Icon, bg, label, hrefFn }) => {
         const value = links[key];
+        const href = hrefFn(value);
 
-        if (!value) {
+        if (!href) {
           return (
             <button
               key={key}
@@ -82,7 +122,7 @@ const SocialBar = () => {
         return (
           <a
             key={key}
-            href={hrefFn(value)}
+            href={href}
             target={key === 'phone' ? '_self' : '_blank'}
             rel="noopener noreferrer"
             className="social-bar-btn"

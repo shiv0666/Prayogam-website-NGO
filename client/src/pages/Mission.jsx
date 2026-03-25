@@ -4,6 +4,49 @@ import Loader from '../components/Loader.jsx';
 import ErrorMessage from '../components/ErrorMessage.jsx';
 import prayogamLogo from '../LOGOs/final.png';
 import handsImage from '../random/hands.jpg';
+import helpingHandsImage from '../random/helping hands.jpg';
+import communityImage from '../random/images.jpg';
+import plantImage from '../random/plant.jpg';
+import globeImage from '../random/globe.jpg';
+import educationSupportImage from '../extra/education-support.svg';
+import socialSupportImage from '../extra/social-support.svg';
+import environmentCareImage from '../extra/environment-care.svg';
+import healthcareSupportImage from '../extra/healthcare-support.svg';
+
+const missionFocusAreas = [
+  {
+    title: 'Education',
+    symbol: 'EDU',
+    accentClass: 'education',
+    image: educationSupportImage,
+    backgroundImage: handsImage,
+    copy: 'We support children with learning resources, mentoring, and opportunities that improve long-term educational continuity.'
+  },
+  {
+    title: 'Social Development',
+    symbol: 'SOC',
+    accentClass: 'social',
+    image: socialSupportImage,
+    backgroundImage: helpingHandsImage,
+    copy: 'We strengthen local communities through awareness drives, inclusion-led engagement, and youth participation programs.'
+  },
+  {
+    title: 'Environment',
+    symbol: 'ENV',
+    accentClass: 'environment',
+    image: environmentCareImage,
+    backgroundImage: plantImage,
+    copy: 'We encourage responsible habits and community action for cleaner surroundings, healthier neighborhoods, and greener futures.'
+  },
+  {
+    title: 'Healthcare',
+    symbol: 'HLT',
+    accentClass: 'healthcare',
+    image: healthcareSupportImage,
+    backgroundImage: globeImage,
+    copy: 'We contribute to better well-being through preventive awareness, local support efforts, and family-centered health initiatives.'
+  }
+];
 
 const Mission = () => {
   const [content, setContent] = useState(null);
@@ -61,6 +104,70 @@ const Mission = () => {
             <div className="p-4 border rounded-3 h-100 bg-light-subtle">
               <h6 className="mb-2">Vision</h6>
               <p className="text-muted mb-0">Build a resilient and equitable society through collaboration, dignity, and opportunity.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mission-focus-wrap mt-4 mt-lg-5">
+        <div className="mission-focus-head text-center mb-4 mb-lg-5">
+          <p className="section-kicker mb-2">Our Key Areas</p>
+          <h2 className="section-title mb-2">Four Focus Areas That Drive Our Mission</h2>
+          <p className="mission-focus-intro text-muted mb-0">
+            Our programs are designed to create practical and lasting impact where families need support the most.
+          </p>
+        </div>
+
+        <div className="row g-4">
+          {missionFocusAreas.map((area) => (
+            <div className="col-sm-6 col-xl-3" key={area.title}>
+              <article
+                className={`focus-card focus-card-${area.accentClass} mission-focus-card h-100 p-4`}
+                style={{
+                  backgroundImage: `url(${area.backgroundImage})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center'
+                }}
+              >
+                <div className="mission-focus-content">
+                  <div className="mission-focus-top d-flex align-items-center justify-content-between mb-3">
+                    <span className="focus-symbol">{area.symbol}</span>
+                    <img
+                      src={area.image}
+                      alt={`${area.title} focus icon`}
+                      className="mission-focus-icon"
+                    />
+                  </div>
+                  <h3 className="h4 mb-2 mission-focus-title">{area.title}</h3>
+                  <p className="mb-0 mission-focus-copy">{area.copy}</p>
+                </div>
+              </article>
+            </div>
+          ))}
+        </div>
+
+        <div className="mission-statement-band mt-4 mt-lg-5 p-4 p-lg-5">
+          <div className="row g-4 align-items-center">
+            <div className="col-lg-7">
+              <p className="section-kicker mb-2">How We Work</p>
+              <h3 className="section-title h2 mb-3">From Local Action to Long-Term Change</h3>
+              <p className="mb-3 text-muted">
+                We work with students, parents, community leaders, and volunteers to identify urgent needs and deliver practical support.
+                Each initiative is built around dignity, participation, and measurable outcomes.
+              </p>
+              <p className="mb-0 text-muted">
+                By combining education, social development, environmental care, and healthcare awareness, we create connected progress that
+                strengthens the full community ecosystem.
+              </p>
+            </div>
+            <div className="col-lg-5">
+              <div className="mission-media-shell">
+                <img
+                  src={communityImage}
+                  alt="Community members engaged in a mission activity"
+                  className="mission-media-image"
+                />
+              </div>
             </div>
           </div>
         </div>

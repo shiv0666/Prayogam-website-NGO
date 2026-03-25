@@ -108,6 +108,7 @@ const Header = ({ admin }) => {
     { to: '/admin/messages', label: 'Messages' },
     { to: '/admin/donations', label: 'Donations' },
     { to: '/admin/stories', label: 'Stories' },
+    { to: '/admin/initiatives', label: 'Initiatives' },
     { to: '/admin/settings', label: 'NGO Details' },
     { to: '/admin/accounts', label: 'Accounts' },
   ];
@@ -122,7 +123,7 @@ const Header = ({ admin }) => {
           onClick={closeMobileNav}
         />
       )}
-      <nav className={`navbar ${admin ? 'navbar-expand-xxl' : 'navbar-expand-lg'} py-3 ${isScrolled ? 'navbar-compact' : ''}`}>
+      <nav className={`navbar ${admin ? 'navbar-expand-xxl' : 'navbar-expand-lg'} py-2 ${isScrolled ? 'navbar-compact' : ''}`}>
         <div className="container">
           <NavLink className="navbar-brand d-flex align-items-center gap-2 site-brand" to={admin ? '/admin/dashboard' : '/'} onClick={closeMobileNav}>
             <img
@@ -130,13 +131,13 @@ const Header = ({ admin }) => {
               alt="Prayogam Foundation logo"
               style={{ 
                 height: '100%', 
-                maxHeight: admin ? '58px' : '70px',
+                maxHeight: admin ? '58px' : '72px',
                 width: 'auto', 
                 objectFit: 'contain',
-                minHeight: admin ? '34px' : '40px'
+                minHeight: admin ? '38px' : '46px'
               }}
             />
-            {!admin && <span className="fw-semibold">{orgName || 'Prayogam Foundation'}</span>}
+            {!admin && <span className="fw-semibold site-brand-name">{orgName || 'Prayogam Foundation'}</span>}
           </NavLink>
 
           <button
