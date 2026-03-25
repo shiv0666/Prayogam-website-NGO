@@ -8,3 +8,4 @@ dist
 build
 server/.mongodb-data/
 .env.example
+server/uploads/
