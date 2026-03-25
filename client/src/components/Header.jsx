@@ -6,8 +6,8 @@ import logo from '../LOGOs/final.png';
 
 const Header = ({ admin }) => {
   const { token, user, logout } = useAuth();
-  const [orgName, setOrgName] = useState('Organization');
-  const [loadError, setLoadError] = useState(false);
+  const [orgName, setOrgName] = useState('Prayogam Foundation');
+  const [orgTagline, setOrgTagline] = useState('Empowering communities through education, health, and innovation');
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -36,12 +36,13 @@ const Header = ({ admin }) => {
     const loadSettings = async () => {
       try {
         const response = await api.get('/settings');
-        if (response.data?.name) {
-          setOrgName(response.data.name);
+        if (response.data?.name?.trim()) setOrgName(response.data.name.trim());
+        if (response.data?.tagline?.trim()) {
+          setOrgTagline(response.data.tagline.trim());
+        } else if (response.data?.domain?.trim()) {
+          setOrgTagline(response.data.domain.trim());
         }
-      } catch (error) {
-        setLoadError(true);
-      }
+      } catch (_error) {}
     };
 
     loadSettings();
@@ -137,7 +138,12 @@ const Header = ({ admin }) => {
                 minHeight: admin ? '38px' : '46px'
               }}
             />
-            {!admin && <span className="fw-semibold site-brand-name">{orgName || 'Prayogam Foundation'}</span>}
+            {!admin && (
+              <span className="d-flex flex-column">
+                <span className="fw-semibold site-brand-name">{orgName || 'Prayogam Foundation'}</span>
+                <small className="site-brand-tagline">{orgTagline}</small>
+              </span>
+            )}
           </NavLink>
 
           <button
@@ -219,8 +225,6 @@ const Header = ({ admin }) => {
                   Logout
                 </button>
               )}
-
-              {!admin && loadError && <span className="navbar-text small text-muted ms-lg-2">Content settings unavailable</span>}
             </div>
           </div>
         </div>

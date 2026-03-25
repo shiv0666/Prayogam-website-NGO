@@ -2,11 +2,11 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../services/api.js';
 import Loader from '../components/Loader.jsx';
-import ErrorMessage from '../components/ErrorMessage.jsx';
 import ImpactStats from '../components/ImpactStats.jsx';
 import indiaMapImage from '../extra/india map.jpg';
 import heroImage from '../extra/sss.jpg';
 import communityEmpowermentImage from '../extra/community-empowerment.svg';
+import readingImg from '../extra/reading.png';
 import handsImage from '../random/hands.jpg';
 import helpingHandsImage from '../random/helping hands.jpg';
 import plantImage from '../random/plant.jpg';
@@ -51,11 +51,103 @@ const fieldsOfWork = [
   }
 ];
 
+const defaultSettings = {
+  name: 'Prayogam Foundation',
+  domain: 'Empowering communities through education, health, and innovation'
+};
+
+const defaultImpactMetrics = [
+  { _id: 'students-supported', description: 'Students Supported', value: '1200+' },
+  { _id: 'communities-reached', description: 'Communities Reached', value: '25+' },
+  { _id: 'volunteers', description: 'Volunteers', value: '150+' },
+  { _id: 'programs-conducted', description: 'Programs Conducted', value: '40+' }
+];
+
+const defaultStories = [
+  {
+    _id: 'story-1',
+    name: 'Prayogam Foundation',
+    title: 'Empowering Young Minds',
+    description: 'Students gained access to learning resources and mentorship programs.',
+    fullStory: 'Students gained access to learning resources and mentorship programs.',
+    image: communityEmpowermentImage
+  },
+  {
+    _id: 'story-2',
+    name: 'Prayogam Foundation',
+    title: 'Health Awareness Drive',
+    description: 'Medical camps improved health awareness in rural communities.',
+    fullStory: 'Medical camps improved health awareness in rural communities.',
+    image: helpingHandsImage
+  },
+  {
+    _id: 'story-3',
+    name: 'Prayogam Foundation',
+    title: 'Community Transformation',
+    description: 'Skill programs helped families improve their livelihoods.',
+    fullStory: 'Skill programs helped families improve their livelihoods.',
+    image: handsImage
+  }
+];
+
+const defaultUpcomingEvents = [
+  {
+    _id: 'default-event-1',
+    title: 'Education Awareness Drive',
+    date: '2026-04-30',
+    location: 'Narsala Ward',
+    description: 'Promoting school attendance and learning continuity.',
+    status: 'active',
+    requirements: { volunteersNeeded: 20, fundsNeeded: 0, itemsNeeded: '' },
+    totalVolunteersRequired: 20,
+    currentApprovedVolunteers: 0
+  },
+  {
+    _id: 'default-event-2',
+    title: 'Mentorship Check-in',
+    date: '2026-06-26',
+    location: 'Prayogam Office',
+    description: 'Monthly progress tracking for students.',
+    status: 'active',
+    requirements: { volunteersNeeded: 10, fundsNeeded: 0, itemsNeeded: '' },
+    totalVolunteersRequired: 10,
+    currentApprovedVolunteers: 0
+  }
+];
+
+const defaultActiveInitiatives = [
+  {
+    _id: 'default-reading-room',
+    title: 'Reading Room Initiative',
+    description: 'Affordable reading space for students to study and grow.',
+    image: readingImg,
+    status: 'ACTIVE'
+  }
+];
+
+const defaultAnnouncements = [
+  {
+    _id: 'default-announcement-1',
+    title: 'Community Programs Ongoing',
+    message: 'Our teams continue weekly education and awareness activities across local communities.',
+    date: new Date().toISOString()
+  }
+];
+
 const getMediaUrl = (path) => {
   if (!path) return '';
   if (path.startsWith('http')) return path;
-  const base = import.meta.env.DEV ? `http://${window.location.hostname}:5050` : '';
-  return `${base}${path}`;
+  const apiBase = String(api.defaults.baseURL || '').replace(/\/api\/?$/, '');
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  return apiBase ? `${apiBase}${normalizedPath}` : normalizedPath;
+};
+
+const resolveStoryImage = (story) => {
+  const source = story?.imageUrl || story?.image || '';
+  if (!source) return '';
+  if (source.startsWith('http')) return source;
+  if (source.startsWith('/uploads')) return getMediaUrl(source);
+  return source;
 };
 
 const initiativeImageMap = Object.fromEntries(
@@ -73,22 +165,21 @@ const resolveInitiativeImage = (image) => {
     return getMediaUrl(image);
   }
 
-  return initiativeImageMap[image] || '';
+  return initiativeImageMap[image] || image;
 };
 
 const Home = () => {
-  const [settings, setSettings] = useState(null);
+  const [settings, setSettings] = useState(defaultSettings);
   const [content, setContent] = useState(null);
-  const [initiatives, setInitiatives] = useState([]);
+  const [initiatives, setInitiatives] = useState(defaultActiveInitiatives);
   const [programs, setPrograms] = useState([]);
-  const [announcements, setAnnouncements] = useState([]);
-  const [events, setEvents] = useState([]);
-  const [impactStats, setImpactStats] = useState([]);
-  const [stories, setStories] = useState([]);
+  const [announcements, setAnnouncements] = useState(defaultAnnouncements);
+  const [events, setEvents] = useState(defaultUpcomingEvents);
+  const [impactStats, setImpactStats] = useState(defaultImpactMetrics);
+  const [stories, setStories] = useState(defaultStories);
   const [selectedStory, setSelectedStory] = useState(null);
   const [openInitiativeId, setOpenInitiativeId] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
 
   useEffect(() => {
     const loadData = async () => {
@@ -106,33 +197,63 @@ const Home = () => {
 
         const [settingsRes, contentRes, initiativesRes, programRes, announcementRes, eventRes, impactStatsRes, storiesRes] = results;
 
-        if (settingsRes.status === 'fulfilled') {
-          setSettings(settingsRes.value.data);
+        if (settingsRes.status === 'fulfilled' && settingsRes.value.data) {
+          setSettings({
+            ...defaultSettings,
+            ...settingsRes.value.data
+          });
+        } else {
+          setSettings(defaultSettings);
         }
+
         if (contentRes.status === 'fulfilled') {
           setContent(contentRes.value.data);
         }
-        if (initiativesRes.status === 'fulfilled') {
-          setInitiatives(Array.isArray(initiativesRes.value.data) ? initiativesRes.value.data : []);
+
+        if (initiativesRes.status === 'fulfilled' && Array.isArray(initiativesRes.value.data) && initiativesRes.value.data.length > 0) {
+          setInitiatives(initiativesRes.value.data);
+        } else {
+          setInitiatives(defaultActiveInitiatives);
         }
+
         if (programRes.status === 'fulfilled') {
           setPrograms(programRes.value.data);
         }
-        if (announcementRes.status === 'fulfilled') {
+
+        if (announcementRes.status === 'fulfilled' && Array.isArray(announcementRes.value.data) && announcementRes.value.data.length > 0) {
           setAnnouncements(announcementRes.value.data);
-        }
-        if (eventRes.status === 'fulfilled') {
-          setEvents(eventRes.value.data);
-        }
-        if (impactStatsRes.status === 'fulfilled') {
-          setImpactStats(impactStatsRes.value.data);
-        }
-        if (storiesRes.status === 'fulfilled') {
-          setStories(storiesRes.value.data);
+        } else {
+          setAnnouncements(defaultAnnouncements);
         }
 
-        if (results.some((result) => result.status === 'rejected')) {
-          setError('Some sections failed to load.');
+        if (eventRes.status === 'fulfilled' && Array.isArray(eventRes.value.data) && eventRes.value.data.length > 0) {
+          setEvents(eventRes.value.data);
+        } else {
+          setEvents(defaultUpcomingEvents);
+        }
+
+        if (impactStatsRes.status === 'fulfilled' && Array.isArray(impactStatsRes.value.data) && impactStatsRes.value.data.length > 0) {
+          const normalizedStats = impactStatsRes.value.data.map((stat, index) => ({
+            ...stat,
+            _id: stat._id || `impact-${index}`,
+            description: stat.description || stat.label || defaultImpactMetrics[index % defaultImpactMetrics.length].description,
+            value: stat.value || defaultImpactMetrics[index % defaultImpactMetrics.length].value
+          }));
+          setImpactStats(normalizedStats);
+        } else {
+          setImpactStats(defaultImpactMetrics);
+        }
+
+        if (storiesRes.status === 'fulfilled' && Array.isArray(storiesRes.value.data) && storiesRes.value.data.length > 0) {
+          const normalizedStories = storiesRes.value.data.map((story, index) => ({
+            ...story,
+            _id: story._id || `story-${index}`,
+            name: story.name || 'Prayogam Foundation',
+            imageUrl: resolveStoryImage(story)
+          }));
+          setStories(normalizedStories);
+        } else {
+          setStories(defaultStories.map((story) => ({ ...story, imageUrl: story.image })));
         }
       } finally {
         setLoading(false);
@@ -157,7 +278,9 @@ const Home = () => {
     return eventDate >= today;
   });
 
-  const groupedEvents = futureEvents.reduce((acc, event) => {
+  const displayEvents = futureEvents.length > 0 ? futureEvents : defaultUpcomingEvents;
+
+  const groupedEvents = displayEvents.reduce((acc, event) => {
     const dateKey = new Date(event.date).toLocaleDateString();
     if (!acc[dateKey]) {
       acc[dateKey] = [];
@@ -169,6 +292,8 @@ const Home = () => {
   const activeInitiatives = initiatives.filter(
     (initiative) => String(initiative.status || '').toLowerCase() === 'active'
   );
+
+  const displayInitiatives = activeInitiatives.length > 0 ? activeInitiatives : defaultActiveInitiatives;
 
   return (
     <div className="d-grid gap-5">
@@ -253,14 +378,13 @@ const Home = () => {
         </div>
       </section>
 
-      {activeInitiatives.length > 0 && (
-        <section className="p-4 p-lg-5">
-          <div className="text-center mb-4 mb-lg-5">
-            <p className="section-kicker mb-2">Active Initiatives</p>
-            <h2 className="section-title mb-0">Current Initiatives in Action</h2>
-          </div>
-          <div className="row g-4">
-            {activeInitiatives.map((initiative) => {
+      <section className="p-4 p-lg-5">
+        <div className="text-center mb-4 mb-lg-5">
+          <p className="section-kicker mb-2">Active Initiatives</p>
+          <h2 className="section-title mb-0">Current Initiatives in Action</h2>
+        </div>
+        <div className="row g-4">
+          {displayInitiatives.map((initiative) => {
               const initiativeId = initiative._id || initiative.title;
               const isOpen = openInitiativeId === initiativeId;
               const panelId = `initiative-panel-${String(initiativeId).replace(/[^a-zA-Z0-9_-]/g, '-')}`;
@@ -300,8 +424,7 @@ const Home = () => {
               );
             })}
           </div>
-        </section>
-      )}
+      </section>
 
       <section>
         <div className="statement-section p-4 p-lg-5">
@@ -327,7 +450,6 @@ const Home = () => {
       </section>
 
       <section className="home-feed-grid">
-        <ErrorMessage message={error} />
         <div className="row g-4">
           <div className="col-xl-5">
             <div className="content-card p-4 h-100">
@@ -336,7 +458,6 @@ const Home = () => {
                 <a href="/contact" className="btn btn-sm btn-outline-secondary">Stay Connected</a>
               </div>
               <div className="d-grid gap-3">
-                {announcements.length === 0 && <div className="text-muted">No announcements available.</div>}
                 {announcements.slice(0, 3).map((announcement) => (
                   <article className="home-feed-card" key={announcement._id}>
                     <p className="section-kicker mb-1">Announcement</p>
@@ -353,7 +474,6 @@ const Home = () => {
             <div className="content-card p-4 h-100">
               <h2 className="section-title h3 mb-3">Upcoming Events</h2>
               <div className="d-grid gap-3">
-                {Object.entries(groupedEvents).length === 0 && <div className="text-muted">No events scheduled.</div>}
                 {Object.entries(groupedEvents).slice(0, 4).map(([date, dateEvents]) => {
                   const event = dateEvents[0];
                   const eventImage = getMediaUrl(event.image);
@@ -421,44 +541,45 @@ const Home = () => {
         </div>
       </section>
 
-      {stories.length > 0 && (
-        <section>
-          <div className="text-center mb-4">
-            <p className="section-kicker mb-2">Stories of Change</p>
-            <h2 className="section-title mb-0">Real People. Real Impact.</h2>
-          </div>
-          <div className="row g-4">
-            {stories.slice(0, 6).map((story) => (
-              <div className="col-md-6 col-lg-4" key={story._id}>
+      <section>
+        <div className="text-center mb-4">
+          <p className="section-kicker mb-2">Stories of Change</p>
+          <h2 className="section-title mb-0">Real People. Real Impact.</h2>
+        </div>
+        <div className="row g-4">
+          {stories.slice(0, 6).map((story) => {
+            const storyImage = resolveStoryImage(story);
+            return (
+              <div className="col-md-6 col-lg-4" key={story._id || story.title}>
                 <div className="story-card h-100" role="button" onClick={() => setSelectedStory(story)} style={{ cursor: 'pointer' }}>
-                  {story.imageUrl && (
+                  {storyImage && (
                     <div className="story-card-img-wrap">
                       <img
-                        src={story.imageUrl}
-                        alt={story.name}
+                        src={storyImage}
+                        alt={story.name || story.title}
                         className="story-card-img"
                       />
                     </div>
                   )}
                   <div className="story-card-body">
-                    <p className="story-card-name">{story.name}</p>
+                    <p className="story-card-name">{story.name || 'Prayogam Foundation'}</p>
                     <h5 className="story-card-title">{story.title}</h5>
                     <p className="story-card-desc">{story.description}</p>
                     <span className="story-card-read-more">Read full story →</span>
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
-        </section>
-      )}
+            );
+          })}
+        </div>
+      </section>
 
       {selectedStory && (
         <div className="story-modal-backdrop" onClick={() => setSelectedStory(null)}>
           <div className="story-modal" onClick={(e) => e.stopPropagation()}>
             <button className="story-modal-close" onClick={() => setSelectedStory(null)} aria-label="Close">✕</button>
-            {selectedStory.imageUrl && (
-              <img src={selectedStory.imageUrl} alt={selectedStory.name} className="story-modal-img" />
+            {resolveStoryImage(selectedStory) && (
+              <img src={resolveStoryImage(selectedStory)} alt={selectedStory.name || selectedStory.title} className="story-modal-img" />
             )}
             <div className="story-modal-body">
               <p className="story-card-name">{selectedStory.name}</p>

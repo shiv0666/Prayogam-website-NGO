@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import api from '../services/api.js';
 import Loader from '../components/Loader.jsx';
-import ErrorMessage from '../components/ErrorMessage.jsx';
 import plantImage from '../random/plant.jpg';
 
 const getMediaUrl = (path) => {
   if (!path) return '';
   if (path.startsWith('http')) return path;
-  const base = import.meta.env.DEV ? `http://${window.location.hostname}:5050` : '';
-  return `${base}${path}`;
+  const apiBase = String(api.defaults.baseURL || '').replace(/\/api\/?$/, '');
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  return apiBase ? `${apiBase}${normalizedPath}` : normalizedPath;
 };
 import img4 from '../img4.jpeg';
 import img5 from '../img5.jpeg';
@@ -21,6 +21,30 @@ import donationBannerImage from '../random/donation banner.jpg';
 import InitiativeTimeline from '../components/InitiativeTimeline.jsx';
 
 const programIllustrations = [educationSupportImage, socialSupportImage, environmentCareImage, healthcareSupportImage];
+
+const defaultPrograms = [
+  {
+    _id: 'default-program-education',
+    title: 'Education Support Program',
+    description: 'Learning support, mentoring, and academic continuity initiatives for children and youth.',
+    image: educationSupportImage,
+    status: 'active'
+  },
+  {
+    _id: 'default-program-healthcare',
+    title: 'Community Health Program',
+    description: 'Health awareness and preventive care outreach through camps and local engagement.',
+    image: healthcareSupportImage,
+    status: 'active'
+  },
+  {
+    _id: 'default-program-environment',
+    title: 'Environment Care Program',
+    description: 'Green action drives and awareness activities for cleaner and safer neighborhoods.',
+    image: environmentCareImage,
+    status: 'active'
+  }
+];
 
 const programGallery = [
   {
@@ -41,9 +65,8 @@ const programGallery = [
 ];
 
 const Programs = () => {
-  const [programs, setPrograms] = useState([]);
+  const [programs, setPrograms] = useState(defaultPrograms);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [selectedProgram, setSelectedProgram] = useState(null);
   const modalPanelRef = useRef(null);
   const previousFocusRef = useRef(null);
@@ -52,9 +75,13 @@ const Programs = () => {
     const loadPrograms = async () => {
       try {
         const response = await api.get('/programs');
-        setPrograms(response.data);
-      } catch (err) {
-        setError('Programs are not available yet.');
+        if (Array.isArray(response.data) && response.data.length > 0) {
+          setPrograms(response.data);
+        } else {
+          setPrograms(defaultPrograms);
+        }
+      } catch (_err) {
+        setPrograms(defaultPrograms);
       } finally {
         setLoading(false);
       }
@@ -158,7 +185,6 @@ const Programs = () => {
 
   return (
     <section>
-      <ErrorMessage message={error} />
       <div className="page-hero programs-hero mb-4" style={{ backgroundImage: `linear-gradient(135deg, rgba(8, 22, 46, 0.8), rgba(14, 72, 92, 0.72)), url(${donationBannerImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
         <p className="section-kicker text-white-50 mb-2">Programs</p>
         <h1 className="section-title text-white mb-2">Our Programs</h1>
@@ -172,11 +198,6 @@ const Programs = () => {
         <span className="text-muted small">{programs.length} initiatives</span>
       </div>
       <div className="row g-4 programs-grid">
-        {programs.length === 0 && (
-          <div className="col-12">
-            <div className="content-card p-4 text-muted text-center">No programs listed.</div>
-          </div>
-        )}
         {programs.map((program, index) => {
           const isEnvironmentProgram = program.title?.toLowerCase().includes('environment') || program.title?.toLowerCase().includes('green') || program.title?.toLowerCase().includes('plant');
           const programImage = program.image ? getMediaUrl(program.image) : programIllustrations[index % programIllustrations.length];

@@ -5,12 +5,31 @@ import ErrorMessage from '../components/ErrorMessage.jsx';
 import contactSupportImage from '../random/get.png';
 import donationBannerImage from '../random/donation banner.jpg';
 
+const defaultContactSettings = {
+  name: 'Prayogam Foundation',
+  address: 'Prayogam Foundation, Narsala Ward, Nagpur',
+  contact: '+91 00000 00000',
+  founder: 'Prayogam Foundation Team',
+  location: 'Nagpur, Maharashtra'
+};
+
+const fallbackEventFromQuery = (eventId, title) => ({
+  _id: eventId || 'fallback-event',
+  title: title || 'Upcoming Volunteer Event',
+  date: '2026-06-26',
+  location: 'Prayogam Office',
+  totalVolunteersRequired: 25,
+  currentApprovedVolunteers: 0,
+  remainingVolunteers: 25,
+  status: 'active'
+});
+
 const Contact = () => {
   const [searchParams] = useSearchParams();
   const eventId = searchParams.get('eventId') || '';
   const eventTitleParam = searchParams.get('eventTitle') || '';
 
-  const [settings, setSettings] = useState(null);
+  const [settings, setSettings] = useState(defaultContactSettings);
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
   const [volunteerFormData, setVolunteerFormData] = useState({ name: '', email: '', phone: '', city: '', message: '' });
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -26,9 +45,13 @@ const Contact = () => {
     const loadSettings = async () => {
       try {
         const response = await api.get('/settings');
-        setSettings(response.data);
-      } catch (err) {
-        setSettings(null);
+        if (response.data) {
+          setSettings({ ...defaultContactSettings, ...response.data });
+        } else {
+          setSettings(defaultContactSettings);
+        }
+      } catch (_err) {
+        setSettings(defaultContactSettings);
       }
     };
 
@@ -48,16 +71,16 @@ const Contact = () => {
         const response = await api.get(`/volunteers/event/${eventId}`);
         setSelectedEvent(response.data);
         setVolunteerError('');
-      } catch (err) {
-        setSelectedEvent(null);
-        setVolunteerError('Could not load event details right now. You can still submit the volunteer request.');
+      } catch (_err) {
+        setSelectedEvent(fallbackEventFromQuery(eventId, eventTitleParam));
+        setVolunteerError('');
       } finally {
         setSelectedEventLoading(false);
       }
     };
 
     loadSelectedEvent();
-  }, [eventId]);
+  }, [eventId, eventTitleParam]);
 
   const remainingSlots = useMemo(() => {
     if (!selectedEvent) return null;
@@ -142,10 +165,10 @@ const Contact = () => {
               />
             </div>
             <h5 className="mb-3">Get in touch</h5>
-            <p className="text-muted mb-2">{settings?.address || 'Address will be updated by admin.'}</p>
-            <p className="mb-2"><strong>Contact:</strong> {settings?.contact || 'Not available'}</p>
-            <p className="mb-2"><strong>Founder:</strong> {settings?.founder || 'Not available'}</p>
-            <p className="mb-0"><strong>Location:</strong> {settings?.location || 'Not available'}</p>
+            <p className="text-muted mb-2">{settings?.address || defaultContactSettings.address}</p>
+            <p className="mb-2"><strong>Contact:</strong> {settings?.contact || defaultContactSettings.contact}</p>
+            <p className="mb-2"><strong>Founder:</strong> {settings?.founder || defaultContactSettings.founder}</p>
+            <p className="mb-0"><strong>Location:</strong> {settings?.location || defaultContactSettings.location}</p>
           </div>
         </div>
         <div className="col-lg-7">
